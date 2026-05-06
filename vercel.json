@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "type": "module",
   "routes": [
     { "src": "/api/search",      "dest": "/api/search.js" },
     { "src": "/api/latest",      "dest": "/api/latest.js" },
