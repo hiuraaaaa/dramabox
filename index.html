@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DramaBox Scraper API — by Gienetic</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d0d11;
+      --bg2: #13131a;
+      --bg3: #1a1a24;
+      --bg4: #20202d;
+      --border: #2a2a38;
+      --border2: #363648;
+      --text: #e0e0f0;
+      --muted: #6a6a82;
+      --accent: #8b6fff;
+      --accent2: #b09fff;
+      --accentbg: rgba(139,111,255,0.10);
+      --green: #3dffa0;
+      --greenbg: rgba(61,255,160,0.08);
+      --red: #ff5f7a;
+      --redbg: rgba(255,95,122,0.10);
+      --yellow: #ffd166;
+      --mono: 'IBM Plex Mono', monospace;
+      --sans: 'IBM Plex Sans', sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.6; -webkit-font-smoothing: antialiased; display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px; min-height: 100vh; background: var(--bg2);
+      border-right: 1px solid var(--border); display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; bottom: 0; overflow-y: auto; z-index: 100;
+    }
+    .sidebar-header {
+      padding: 24px 20px 16px; border-bottom: 1px solid var(--border);
+    }
+    .sidebar-logo {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 6px;
+    }
+    .logo-icon {
+      width: 32px; height: 32px; background: var(--accent);
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .logo-text { font-family: var(--mono); font-weight: 700; font-size: 15px; color: var(--text); }
+    .logo-sub { font-size: 11px; color: var(--muted); font-family: var(--mono); }
+    .badge-engine {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--accentbg); border: 1px solid var(--accent);
+      color: var(--accent2); font-family: var(--mono); font-size: 10px;
+      padding: 2px 8px; border-radius: 20px; margin-top: 8px;
+    }
+    .badge-dot { width: 5px; height: 5px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    .sidebar-section { padding: 16px 12px 8px; }
+    .sidebar-label { font-size: 10px; font-family: var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; padding: 0 8px; margin-bottom: 6px; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 10px; border-radius: 6px; cursor: pointer;
+      transition: all 0.15s; color: var(--muted); font-size: 13px;
+      text-decoration: none; border: 1px solid transparent;
+    }
+    .nav-item:hover { background: var(--bg3); color: var(--text); border-color: var(--border); }
+    .nav-item.active { background: var(--accentbg); color: var(--accent2); border-color: var(--accent); }
+    .nav-item .nav-icon { font-size: 14px; width: 18px; text-align: center; }
+    .nav-method {
+      margin-left: auto; font-family: var(--mono); font-size: 9px;
+      background: var(--greenbg); color: var(--green); padding: 1px 6px; border-radius: 4px;
+    }
+
+    /* Main */
+    .main { margin-left: 260px; flex: 1; min-height: 100vh; }
+
+    /* Hero */
+    .hero {
+      padding: 48px 48px 32px; border-bottom: 1px solid var(--border);
+      background: linear-gradient(135deg, var(--bg) 0%, var(--bg2) 100%);
+    }
+    .hero-tag { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
+    .hero-title { font-size: 32px; font-weight: 600; line-height: 1.2; margin-bottom: 10px; }
+    .hero-title span { color: var(--accent2); }
+    .hero-desc { color: var(--muted); font-size: 14px; max-width: 560px; margin-bottom: 20px; }
+    .hero-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--bg3); border: 1px solid var(--border2);
+      color: var(--muted); font-family: var(--mono); font-size: 11px;
+      padding: 4px 10px; border-radius: 20px;
+    }
+    .chip.green { background: var(--greenbg); border-color: var(--green); color: var(--green); }
+    .chip.purple { background: var(--accentbg); border-color: var(--accent); color: var(--accent2); }
+
+    /* Stats */
+    .stats-bar {
+      display: flex; gap: 0; border-bottom: 1px solid var(--border);
+    }
+    .stat-item {
+      flex: 1; padding: 18px 24px; border-right: 1px solid var(--border);
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-num { font-family: var(--mono); font-size: 22px; font-weight: 700; color: var(--accent2); }
+    .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* Content */
+    .content { padding: 32px 48px; }
+
+    /* Endpoint Card */
+    .endpoint-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 10px; margin-bottom: 20px; overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .endpoint-card:hover { border-color: var(--border2); }
+    .endpoint-header {
+      display: flex; align-items: center; gap: 14px;
+      padding: 16px 20px; cursor: pointer; user-select: none;
+    }
+    .method-badge {
+      font-family: var(--mono); font-size: 11px; font-weight: 700;
+      padding: 3px 10px; border-radius: 5px; flex-shrink: 0;
+      background: var(--greenbg); color: var(--green); border: 1px solid var(--green);
+    }
+    .endpoint-path {
+      font-family: var(--mono); font-size: 13px; color: var(--text); font-weight: 500;
+    }
+    .endpoint-desc { color: var(--muted); font-size: 12px; margin-left: auto; }
+    .endpoint-chevron { color: var(--muted); font-size: 12px; margin-left: 8px; transition: transform 0.2s; }
+    .endpoint-card.open .endpoint-chevron { transform: rotate(180deg); }
+
+    .endpoint-body { display: none; border-top: 1px solid var(--border); }
+    .endpoint-card.open .endpoint-body { display: block; }
+
+    .endpoint-inner { padding: 20px; }
+    .params-title { font-size: 11px; font-family: var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+
+    .param-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-start; }
+    .param-info { width: 180px; flex-shrink: 0; }
+    .param-name { font-family: var(--mono); font-size: 12px; color: var(--accent2); }
+    .param-type { font-size: 10px; color: var(--muted); }
+    .param-required { color: var(--red); font-size: 10px; }
+    .param-input {
+      flex: 1; background: var(--bg); border: 1px solid var(--border2);
+      color: var(--text); font-family: var(--mono); font-size: 12px;
+      padding: 7px 12px; border-radius: 6px; outline: none; transition: border-color 0.15s;
+    }
+    .param-input:focus { border-color: var(--accent); }
+    .param-input::placeholder { color: var(--muted); }
+
+    .param-select {
+      flex: 1; background: var(--bg); border: 1px solid var(--border2);
+      color: var(--text); font-family: var(--mono); font-size: 12px;
+      padding: 7px 12px; border-radius: 6px; outline: none; cursor: pointer;
+    }
+    .param-select:focus { border-color: var(--accent); }
+
+    .btn-execute {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--accent); color: #fff; font-family: var(--mono); font-size: 12px; font-weight: 600;
+      padding: 9px 20px; border-radius: 6px; border: none; cursor: pointer;
+      transition: all 0.15s; margin-top: 4px;
+    }
+    .btn-execute:hover { background: var(--accent2); transform: translateY(-1px); }
+    .btn-execute:active { transform: translateY(0); }
+    .btn-execute:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .url-preview {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 6px; padding: 10px 14px; margin: 12px 0;
+      font-family: var(--mono); font-size: 11px; color: var(--muted);
+      word-break: break-all;
+    }
+    .url-preview span { color: var(--accent2); }
+
+    .response-box {
+      margin-top: 16px; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; overflow: hidden;
+    }
+    .response-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 14px; border-bottom: 1px solid var(--border);
+      background: var(--bg3);
+    }
+    .response-status {
+      font-family: var(--mono); font-size: 11px; display: flex; align-items: center; gap: 8px;
+    }
+    .status-ok { color: var(--green); }
+    .status-err { color: var(--red); }
+    .status-loading { color: var(--yellow); }
+    .btn-copy {
+      background: var(--bg4); border: 1px solid var(--border2); color: var(--muted);
+      font-family: var(--mono); font-size: 10px; padding: 3px 10px; border-radius: 4px;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .btn-copy:hover { color: var(--text); border-color: var(--border2); }
+    .response-pre {
+      padding: 16px; font-family: var(--mono); font-size: 11px; line-height: 1.7;
+      color: var(--text); overflow-x: auto; max-height: 400px; overflow-y: auto;
+      white-space: pre;
+    }
+
+    /* Section title */
+    .section-title {
+      font-size: 18px; font-weight: 600; margin-bottom: 6px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .section-title::before {
+      content: ''; display: block; width: 3px; height: 20px;
+      background: var(--accent); border-radius: 2px;
+    }
+    .section-desc { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+
+    .section-group { margin-bottom: 40px; }
+
+    /* Base URL box */
+    .base-url-box {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 14px 20px; margin-bottom: 28px;
+      display: flex; align-items: center; gap: 14px;
+    }
+    .base-url-label { font-size: 11px; color: var(--muted); font-family: var(--mono); white-space: nowrap; }
+    .base-url-val { font-family: var(--mono); font-size: 13px; color: var(--accent2); }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg2); }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar { width: 100%; min-height: auto; position: relative; }
+      .main { margin-left: 0; }
+      .hero { padding: 24px 20px; }
+      .content { padding: 20px; }
+      .stats-bar { flex-direction: column; }
+      .stat-item { border-right: none; border-bottom: 1px solid var(--border); }
+    }
+
+    /* JSON syntax highlight */
+    .json-key { color: #b09fff; }
+    .json-str { color: #3dffa0; }
+    .json-num { color: #ffd166; }
+    .json-bool { color: #ff9f7a; }
+    .json-null { color: #ff5f7a; }
+
+    .spinner {
+      display: inline-block; width: 12px; height: 12px;
+      border: 2px solid var(--muted); border-top-color: var(--accent);
+      border-radius: 50%; animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🎬</div>
+      <div>
+        <div class="logo-text">DramaBox API</div>
+        <div class="logo-sub">by Gienetic</div>
+      </div>
+    </div>
+    <div class="badge-engine">
+      <span class="badge-dot"></span>
+      Exsala Engine · V5
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">Navigation</div>
+    <a class="nav-item active" href="#search" onclick="setActive(this)">
+      <span class="nav-icon">🔍</span> Search Drama
+      <span class="nav-method">GET</span>
+    </a>
+    <a class="nav-item" href="#latest" onclick="setActive(this)">
+      <span class="nav-icon">🆕</span> Latest
+      <span class="nav-method">GET</span>
+    </a>
+    <a class="nav-item" href="#foryou" onclick="setActive(this)">
+      <span class="nav-icon">✨</span> For You
+      <span class="nav-method">GET</span>
+    </a>
+    <a class="nav-item" href="#comingsoon" onclick="setActive(this)">
+      <span class="nav-icon">📅</span> Coming Soon
+      <span class="nav-method">GET</span>
+    </a>
+    <a class="nav-item" href="#rank" onclick="setActive(this)">
+      <span class="nav-icon">🏆</span> Ranking
+      <span class="nav-method">GET</span>
+    </a>
+    <a class="nav-item" href="#vip" onclick="setActive(this)">
+      <span class="nav-icon">👑</span> VIP / Eksklusif
+      <span class="nav-method">GET</span>
+    </a>
+    <a class="nav-item" href="#classify" onclick="setActive(this)">
+      <span class="nav-icon">🗂️</span> Classify
+      <span class="nav-method">GET</span>
+    </a>
+    <a class="nav-item" href="#episodes" onclick="setActive(this)">
+      <span class="nav-icon">🎞️</span> Episodes
+      <span class="nav-method">GET</span>
+    </a>
+    <a class="nav-item" href="#decrypt" onclick="setActive(this)">
+      <span class="nav-icon">🔓</span> Decrypt URL
+      <span class="nav-method">GET</span>
+    </a>
+  </div>
+
+  <div class="sidebar-section" style="margin-top:auto; padding-bottom:20px;">
+    <div class="sidebar-label">Info</div>
+    <div style="padding:0 8px; font-size:11px; color:var(--muted); font-family:var(--mono); line-height:1.8;">
+      Powered by Exsala Proxy<br>
+      Akamai Bypass Engine<br>
+      Engine: Node.js · Vercel
+    </div>
+  </div>
+</aside>
+
+<!-- Main -->
+<main class="main">
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-tag">⚡ Ultimate Scraper API</div>
+    <h1 class="hero-title">DramaBox Scraper <span>V5</span></h1>
+    <p class="hero-desc">Full REST API wrapper untuk DramaBox — powered by Exsala Proxy & Akamai Bypass Engine. Scrape search, ranking, episode list, decrypt video URL, dan lebih banyak lagi.</p>
+    <div class="hero-chips">
+      <span class="chip green">● Live</span>
+      <span class="chip purple">⚡ Exsala Engine</span>
+      <span class="chip">🛡️ Akamai Bypass</span>
+      <span class="chip">🇮🇩 in_ID Locale</span>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat-item">
+      <div class="stat-num">9</div>
+      <div class="stat-label">Endpoints</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">REST</div>
+      <div class="stat-label">Protocol</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">JSON</div>
+      <div class="stat-label">Response</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">V5</div>
+      <div class="stat-label">Engine</div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <div class="base-url-box">
+      <span class="base-url-label">BASE URL</span>
+      <span class="base-url-val" id="baseUrl">https://your-project.vercel.app</span>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="section-group" id="search">
+      <div class="section-title">Search Drama</div>
+      <p class="section-desc">Cari drama berdasarkan keyword dengan filter sort dan pagination otomatis.</p>
+
+      <div class="endpoint-card open">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge">GET</span>
+          <span class="endpoint-path">/api/search</span>
+          <span class="endpoint-desc">Search by keyword</span>
+          <span class="endpoint-chevron">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="endpoint-inner">
+            <div class="params-title">Parameters</div>
+            <div class="param-row">
+              <div class="param-info">
+                <div class="param-name">q <span class="param-required">*</span></div>
+                <div class="param-type">string — keyword pencarian</div>
+              </div>
+              <input class="param-input" id="search-q" placeholder="cth: business proposal" oninput="updateUrl('search')">
+            </div>
+            <div class="param-row">
+              <div class="param-info">
+                <div class="param-name">sort</div>
+                <div class="param-type">1=Trending 2=Latest 3=Unwatched</div>
+              </div>
+              <select class="param-select" id="search-sort" onchange="updateUrl('search')">
+                <option value="1">1 — Trending</option>
+                <option value="2">2 — Latest</option>
+                <option value="3">3 — Unwatched</option>
+              </select>
+            </div>
+            <div class="url-preview" id="search-url-preview">
+              GET <span id="search-url-text">/api/search?q=&sort=1</span>
+            </div>
+            <button class="btn-execute" onclick="execute('search')">▶ Execute</button>
+            <div class="response-box" id="search-response" style="display:none">
+              <div class="response-header">
+                <span class="response-status" id="search-status"></span>
+                <button class="btn-copy" onclick="copyResponse('search')">Copy JSON</button>
+              </div>
+              <pre class="response-pre" id="search-pre"></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LATEST -->
+    <div class="section-group" id="latest">
+      <div class="section-title">Latest / Terbaru</div>
+      <p class="section-desc">Ambil daftar drama terbaru yang sudah tayang (full pagination).</p>
+      <div class="endpoint-card">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge">GET</span>
+          <span class="endpoint-path">/api/latest</span>
+          <span class="endpoint-desc">Daftar drama terbaru</span>
+          <span class="endpoint-chevron">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="endpoint-inner">
+            <div class="params-title">No Parameters</div>
+            <div class="url-preview">GET <span>/api/latest</span></div>
+            <button class="btn-execute" onclick="execute('latest')">▶ Execute</button>
+            <div class="response-box" id="latest-response" style="display:none">
+              <div class="response-header">
+                <span class="response-status" id="latest-status"></span>
+                <button class="btn-copy" onclick="copyResponse('latest')">Copy JSON</button>
+              </div>
+              <pre class="response-pre" id="latest-pre"></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOR YOU -->
+    <div class="section-group" id="foryou">
+      <div class="section-title">For You / Rekomendasi</div>
+      <p class="section-desc">Drama yang direkomendasikan oleh sistem DramaBox.</p>
+      <div class="endpoint-card">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge">GET</span>
+          <span class="endpoint-path">/api/foryou</span>
+          <span class="endpoint-desc">Rekomendasi drama</span>
+          <span class="endpoint-chevron">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="endpoint-inner">
+            <div class="params-title">No Parameters</div>
+            <div class="url-preview">GET <span>/api/foryou</span></div>
+            <button class="btn-execute" onclick="execute('foryou')">▶ Execute</button>
+            <div class="response-box" id="foryou-response" style="display:none">
+              <div class="response-header">
+                <span class="response-status" id="foryou-status"></span>
+                <button class="btn-copy" onclick="copyResponse('foryou')">Copy JSON</button>
+              </div>
+              <pre class="response-pre" id="foryou-pre"></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMING SOON -->
+    <div class="section-group" id="comingsoon">
+      <div class="section-title">Coming Soon / Akan Tayang</div>
+      <p class="section-desc">Daftar drama yang akan segera tayang beserta tanggal rilisnya.</p>
+      <div class="endpoint-card">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge">GET</span>
+          <span class="endpoint-path">/api/comingsoon</span>
+          <span class="endpoint-desc">Drama akan tayang</span>
+          <span class="endpoint-chevron">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="endpoint-inner">
+            <div class="params-title">No Parameters</div>
+            <div class="url-preview">GET <span>/api/comingsoon</span></div>
+            <button class="btn-execute" onclick="execute('comingsoon')">▶ Execute</button>
+            <div class="response-box" id="comingsoon-response" style="display:none">
+              <div class="response-header">
+                <span class="response-status" id="comingsoon-status"></span>
+                <button class="btn-copy" onclick="copyResponse('comingsoon')">Copy JSON</button>
+              </div>
+              <pre class="response-pre" id="comingsoon-pre"></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RANK -->
+    <div class="section-group" id="rank">
+      <div class="section-title">Ranking / Charts</div>
+      <p class="section-desc">Top drama berdasarkan kategori ranking yang tersedia.</p>
+      <div class="endpoint-card">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge">GET</span>
+          <span class="endpoint-path">/api/rank</span>
+          <span class="endpoint-desc">Top ranking drama</span>
+          <span class="endpoint-chevron">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="endpoint-inner">
+            <div class="params-title">Parameters</div>
+            <div class="param-row">
+              <div class="param-info">
+                <div class="param-name">type</div>
+                <div class="param-type">1=Trending 2=Popular Search 3=Newest</div>
+              </div>
+              <select class="param-select" id="rank-type" onchange="updateUrl('rank')">
+                <option value="1">1 — Trending</option>
+                <option value="2">2 — Popular Search</option>
+                <option value="3">3 — Newest</option>
+              </select>
+            </div>
+            <div class="url-preview">GET <span id="rank-url-text">/api/rank?type=1</span></div>
+            <button class="btn-execute" onclick="execute('rank')">▶ Execute</button>
+            <div class="response-box" id="rank-response" style="display:none">
+              <div class="response-header">
+                <span class="response-status" id="rank-status"></span>
+                <button class="btn-copy" onclick="copyResponse('rank')">Copy JSON</button>
+              </div>
+              <pre class="response-pre" id="rank-pre"></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIP -->
+    <div class="section-group" id="vip">
+      <div class="section-title">VIP / Eksklusif</div>
+      <p class="section-desc">Koleksi drama eksklusif pilihan mingguan VIP.</p>
+      <div class="endpoint-card">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge">GET</span>
+          <span class="endpoint-path">/api/vip</span>
+          <span class="endpoint-desc">Drama eksklusif VIP</span>
+          <span class="endpoint-chevron">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="endpoint-inner">
+            <div class="params-title">No Parameters</div>
+            <div class="url-preview">GET <span>/api/vip</span></div>
+            <button class="btn-execute" onclick="execute('vip')">▶ Execute</button>
+            <div class="response-box" id="vip-response" style="display:none">
+              <div class="response-header">
+                <span class="response-status" id="vip-status"></span>
+                <button class="btn-copy" onclick="copyResponse('vip')">Copy JSON</button>
+              </div>
+              <pre class="response-pre" id="vip-pre"></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLASSIFY -->
+    <div class="section-group" id="classify">
+      <div class="section-title">Classify / Kategori</div>
+      <p class="section-desc">Browse drama berdasarkan kategori genre (full pagination).</p>
+      <div class="endpoint-card">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge">GET</span>
+          <span class="endpoint-path">/api/classify</span>
+          <span class="endpoint-desc">Jelajah semua kategori</span>
+          <span class="endpoint-chevron">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="endpoint-inner">
+            <div class="params-title">No Parameters</div>
+            <div class="url-preview">GET <span>/api/classify</span></div>
+            <button class="btn-execute" onclick="execute('classify')">▶ Execute</button>
+            <div class="response-box" id="classify-response" style="display:none">
+              <div class="response-header">
+                <span class="response-status" id="classify-status"></span>
+                <button class="btn-copy" onclick="copyResponse('classify')">Copy JSON</button>
+              </div>
+              <pre class="response-pre" id="classify-pre"></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EPISODES -->
+    <div class="section-group" id="episodes">
+      <div class="section-title">Episodes / Raw Data</div>
+      <p class="section-desc">Ambil semua episode dari sebuah drama berdasarkan Book ID.</p>
+      <div class="endpoint-card">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge">GET</span>
+          <span class="endpoint-path">/api/episodes</span>
+          <span class="endpoint-desc">List episode per drama</span>
+          <span class="endpoint-chevron">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="endpoint-inner">
+            <div class="params-title">Parameters</div>
+            <div class="param-row">
+              <div class="param-info">
+                <div class="param-name">id <span class="param-required">*</span></div>
+                <div class="param-type">string — Book ID drama</div>
+              </div>
+              <input class="param-input" id="episodes-id" placeholder="cth: 1234567" oninput="updateUrl('episodes')">
+            </div>
+            <div class="url-preview">GET <span id="episodes-url-text">/api/episodes?id=</span></div>
+            <button class="btn-execute" onclick="execute('episodes')">▶ Execute</button>
+            <div class="response-box" id="episodes-response" style="display:none">
+              <div class="response-header">
+                <span class="response-status" id="episodes-status"></span>
+                <button class="btn-copy" onclick="copyResponse('episodes')">Copy JSON</button>
+              </div>
+              <pre class="response-pre" id="episodes-pre"></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DECRYPT -->
+    <div class="section-group" id="decrypt">
+      <div class="section-title">Decrypt Video URL</div>
+      <p class="section-desc">Decrypt URL video terenkripsi menjadi URL yang bisa langsung diputar via Exsala Proxy.</p>
+      <div class="endpoint-card">
+        <div class="endpoint-header" onclick="toggleCard(this)">
+          <span class="method-badge">GET</span>
+          <span class="endpoint-path">/api/decrypt</span>
+          <span class="endpoint-desc">Decrypt video URL</span>
+          <span class="endpoint-chevron">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="endpoint-inner">
+            <div class="params-title">Parameters</div>
+            <div class="param-row">
+              <div class="param-info">
+                <div class="param-name">url <span class="param-required">*</span></div>
+                <div class="param-type">string — URL video terenkripsi</div>
+              </div>
+              <input class="param-input" id="decrypt-url" placeholder="https://cdn.dramaboxdb.com/..." oninput="updateUrl('decrypt')">
+            </div>
+            <div class="url-preview">GET <span id="decrypt-url-text">/api/decrypt?url=</span></div>
+            <button class="btn-execute" onclick="execute('decrypt')">▶ Execute</button>
+            <div class="response-box" id="decrypt-response" style="display:none">
+              <div class="response-header">
+                <span class="response-status" id="decrypt-status"></span>
+                <button class="btn-copy" onclick="copyResponse('decrypt')">Copy JSON</button>
+              </div>
+              <pre class="response-pre" id="decrypt-pre"></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</main>
+
+<script>
+  // Set base URL from current location
+  const baseUrl = window.location.origin;
+  document.getElementById('baseUrl').textContent = baseUrl;
+
+  // Store responses
+  const responses = {};
+
+  function setActive(el) {
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function toggleCard(header) {
+    const card = header.parentElement;
+    card.classList.toggle('open');
+  }
+
+  function updateUrl(endpoint) {
+    const el = document.getElementById(`${endpoint}-url-text`);
+    if (!el) return;
+
+    let url = `/api/${endpoint}`;
+    const params = new URLSearchParams();
+
+    if (endpoint === 'search') {
+      const q = document.getElementById('search-q').value;
+      const sort = document.getElementById('search-sort').value;
+      if (q) params.set('q', q);
+      params.set('sort', sort);
+    } else if (endpoint === 'rank') {
+      params.set('type', document.getElementById('rank-type').value);
+    } else if (endpoint === 'episodes') {
+      const id = document.getElementById('episodes-id').value;
+      if (id) params.set('id', id);
+    } else if (endpoint === 'decrypt') {
+      const u = document.getElementById('decrypt-url').value;
+      if (u) params.set('url', u);
+    }
+
+    if ([...params].length) url += '?' + params.toString();
+    el.textContent = url;
+  }
+
+  function syntaxHighlight(json) {
+    if (typeof json !== 'string') json = JSON.stringify(json, null, 2);
+    return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, match => {
+      let cls = 'json-num';
+      if (/^"/.test(match)) cls = /:$/.test(match) ? 'json-key' : 'json-str';
+      else if (/true|false/.test(match)) cls = 'json-bool';
+      else if (/null/.test(match)) cls = 'json-null';
+      return `<span class="${cls}">${match}</span>`;
+    });
+  }
+
+  async function execute(endpoint) {
+    const btn = event.target;
+    const resBox = document.getElementById(`${endpoint}-response`);
+    const statusEl = document.getElementById(`${endpoint}-status`);
+    const preEl = document.getElementById(`${endpoint}-pre`);
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Loading...';
+    resBox.style.display = 'block';
+    statusEl.innerHTML = '<span class="status-loading">● Fetching...</span>';
+    preEl.innerHTML = '';
+
+    let url = `${baseUrl}/api/${endpoint}`;
+    const params = new URLSearchParams();
+
+    try {
+      if (endpoint === 'search') {
+        const q = document.getElementById('search-q').value.trim();
+        if (!q) { throw new Error('Parameter q wajib diisi!'); }
+        params.set('q', q);
+        params.set('sort', document.getElementById('search-sort').value);
+      } else if (endpoint === 'rank') {
+        params.set('type', document.getElementById('rank-type').value);
+      } else if (endpoint === 'episodes') {
+        const id = document.getElementById('episodes-id').value.trim();
+        if (!id) { throw new Error('Parameter id wajib diisi!'); }
+        params.set('id', id);
+      } else if (endpoint === 'decrypt') {
+        const u = document.getElementById('decrypt-url').value.trim();
+        if (!u) { throw new Error('Parameter url wajib diisi!'); }
+        params.set('url', u);
+      }
+
+      if ([...params].length) url += '?' + params.toString();
+
+      const start = Date.now();
+      const res = await fetch(url);
+      const elapsed = Date.now() - start;
+      const data = await res.json();
+
+      responses[endpoint] = data;
+
+      statusEl.innerHTML = `<span class="status-ok">● ${res.status} OK</span> <span style="color:var(--muted);font-size:10px;">${elapsed}ms · ${JSON.stringify(data).length} bytes</span>`;
+      preEl.innerHTML = syntaxHighlight(JSON.stringify(data, null, 2));
+    } catch (err) {
+      statusEl.innerHTML = `<span class="status-err">● Error</span>`;
+      preEl.innerHTML = `<span class="json-null">${err.message}</span>`;
+      responses[endpoint] = { error: err.message };
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '▶ Execute';
+  }
+
+  function copyResponse(endpoint) {
+    const data = responses[endpoint];
+    if (!data) return;
+    navigator.clipboard.writeText(JSON.stringify(data, null, 2)).then(() => {
+      const btn = event.target;
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy JSON', 1500);
+    });
+  }
+</script>
+</body>
+</html>

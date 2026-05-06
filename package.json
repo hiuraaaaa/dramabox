@@ -1,0 +1,12 @@
+{
+  "name": "dramabox-scraper",
+  "version": "1.0.0",
+  "description": "Dramabox Scraper API by Gienetic",
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
+}

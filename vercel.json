@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "type": "module",
+  "routes": [
+    { "src": "/api/search",      "dest": "/api/search.js" },
+    { "src": "/api/latest",      "dest": "/api/latest.js" },
+    { "src": "/api/foryou",      "dest": "/api/foryou.js" },
+    { "src": "/api/comingsoon",  "dest": "/api/comingsoon.js" },
+    { "src": "/api/rank",        "dest": "/api/rank.js" },
+    { "src": "/api/vip",         "dest": "/api/vip.js" },
+    { "src": "/api/classify",    "dest": "/api/classify.js" },
+    { "src": "/api/episodes",    "dest": "/api/episodes.js" },
+    { "src": "/api/decrypt",     "dest": "/api/decrypt.js" },
+    { "src": "/(.*)",            "dest": "/index.html" }
+  ]
+}
