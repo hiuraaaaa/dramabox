@@ -1,792 +1,1054 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DramaBox Scraper API — by Gienetic</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #0d0d11;
-      --bg2: #13131a;
-      --bg3: #1a1a24;
-      --bg4: #20202d;
-      --border: #2a2a38;
-      --border2: #363648;
-      --text: #e0e0f0;
-      --muted: #6a6a82;
-      --accent: #8b6fff;
-      --accent2: #b09fff;
-      --accentbg: rgba(139,111,255,0.10);
-      --green: #3dffa0;
-      --greenbg: rgba(61,255,160,0.08);
-      --red: #ff5f7a;
-      --redbg: rgba(255,95,122,0.10);
-      --yellow: #ffd166;
-      --mono: 'IBM Plex Mono', monospace;
-      --sans: 'IBM Plex Sans', sans-serif;
-    }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.6; -webkit-font-smoothing: antialiased; display: flex; min-height: 100vh; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DramaBox Scraper API — by Gienetic</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #121212;
+            --bg2: #1a1a1a;
+            --bg3: #222222;
+            --border: #2e2e2e;
+            --text: #e5e5e5;
+            --muted: #888;
+--red: #8B5CF6;
+--red-dim: rgba(139, 92, 246, 0.12);
+            --green: #4ade80;
+            --mono: 'JetBrains Mono', monospace;
+            --sans: 'Inter', sans-serif;
+            --radius: 4px;
+        }
 
-    /* Sidebar */
-    .sidebar {
-      width: 260px; min-height: 100vh; background: var(--bg2);
-      border-right: 1px solid var(--border); display: flex; flex-direction: column;
-      position: fixed; top: 0; left: 0; bottom: 0; overflow-y: auto; z-index: 100;
-    }
-    .sidebar-header {
-      padding: 24px 20px 16px; border-bottom: 1px solid var(--border);
-    }
-    .sidebar-logo {
-      display: flex; align-items: center; gap: 10px; margin-bottom: 6px;
-    }
-    .logo-icon {
-      width: 32px; height: 32px; background: var(--accent);
-      border-radius: 8px; display: flex; align-items: center; justify-content: center;
-      font-size: 16px;
-    }
-    .logo-text { font-family: var(--mono); font-weight: 700; font-size: 15px; color: var(--text); }
-    .logo-sub { font-size: 11px; color: var(--muted); font-family: var(--mono); }
-    .badge-engine {
-      display: inline-flex; align-items: center; gap: 5px;
-      background: var(--accentbg); border: 1px solid var(--accent);
-      color: var(--accent2); font-family: var(--mono); font-size: 10px;
-      padding: 2px 8px; border-radius: 20px; margin-top: 8px;
-    }
-    .badge-dot { width: 5px; height: 5px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-    .sidebar-section { padding: 16px 12px 8px; }
-    .sidebar-label { font-size: 10px; font-family: var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; padding: 0 8px; margin-bottom: 6px; }
-    .nav-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 8px 10px; border-radius: 6px; cursor: pointer;
-      transition: all 0.15s; color: var(--muted); font-size: 13px;
-      text-decoration: none; border: 1px solid transparent;
-    }
-    .nav-item:hover { background: var(--bg3); color: var(--text); border-color: var(--border); }
-    .nav-item.active { background: var(--accentbg); color: var(--accent2); border-color: var(--accent); }
-    .nav-item .nav-icon { font-size: 14px; width: 18px; text-align: center; }
-    .nav-method {
-      margin-left: auto; font-family: var(--mono); font-size: 9px;
-      background: var(--greenbg); color: var(--green); padding: 1px 6px; border-radius: 4px;
-    }
+        html {
+            scroll-behavior: smooth;
+        }
 
-    /* Main */
-    .main { margin-left: 260px; flex: 1; min-height: 100vh; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--sans);
+            font-size: 14px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
 
-    /* Hero */
-    .hero {
-      padding: 48px 48px 32px; border-bottom: 1px solid var(--border);
-      background: linear-gradient(135deg, var(--bg) 0%, var(--bg2) 100%);
-    }
-    .hero-tag { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
-    .hero-title { font-size: 32px; font-weight: 600; line-height: 1.2; margin-bottom: 10px; }
-    .hero-title span { color: var(--accent2); }
-    .hero-desc { color: var(--muted); font-size: 14px; max-width: 560px; margin-bottom: 20px; }
-    .hero-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-    .chip {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: var(--bg3); border: 1px solid var(--border2);
-      color: var(--muted); font-family: var(--mono); font-size: 11px;
-      padding: 4px 10px; border-radius: 20px;
-    }
-    .chip.green { background: var(--greenbg); border-color: var(--green); color: var(--green); }
-    .chip.purple { background: var(--accentbg); border-color: var(--accent); color: var(--accent2); }
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(14px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
 
-    /* Stats */
-    .stats-bar {
-      display: flex; gap: 0; border-bottom: 1px solid var(--border);
-    }
-    .stat-item {
-      flex: 1; padding: 18px 24px; border-right: 1px solid var(--border);
-    }
-    .stat-item:last-child { border-right: none; }
-    .stat-num { font-family: var(--mono); font-size: 22px; font-weight: 700; color: var(--accent2); }
-    .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
 
-    /* Content */
-    .content { padding: 32px 48px; }
+        /* SIDEBAR */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 260px;
+            height: 100vh;
+            background: #0e0e0e;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            overflow-y: auto;
+            transition: transform .3s ease;
+        }
+        .sidebar-header {
+            padding: 20px 20px 16px;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+        }
+        .sidebar-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40%;
+            height: 1px;
+            background: var(--red);
+            opacity: 0.6;
+        }
+        .sidebar-title {
+            font-family: var(--mono);
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: 0.08em;
+        }
+        .sidebar-sub {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 2px;
+            letter-spacing: 0.05em;
+        }
+        .sidebar-nav {
+            padding: 12px 0;
+            flex: 1;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 20px;
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--muted);
+            cursor: pointer;
+            text-decoration: none;
+            transition: color .15s, background .15s;
+            border-left: 2px solid transparent;
+        }
+        .nav-item:hover {
+            color: var(--text);
+            background: var(--bg3);
+        }
+        .nav-item.active {
+            color: var(--red);
+            border-left-color: var(--red);
+            background: var(--red-dim);
+            padding-left: 24px;
+        }
+        .nav-method {
+            font-size: 9px;
+            font-weight: 700;
+            color: var(--red);
+            background: var(--red-dim);
+            padding: 1px 5px;
+            border-radius: 2px;
+            letter-spacing: 0.05em;
+            margin-left: auto;
+        }
 
-    /* Endpoint Card */
-    .endpoint-card {
-      background: var(--bg2); border: 1px solid var(--border);
-      border-radius: 10px; margin-bottom: 20px; overflow: hidden;
-      transition: border-color 0.2s;
-    }
-    .endpoint-card:hover { border-color: var(--border2); }
-    .endpoint-header {
-      display: flex; align-items: center; gap: 14px;
-      padding: 16px 20px; cursor: pointer; user-select: none;
-    }
-    .method-badge {
-      font-family: var(--mono); font-size: 11px; font-weight: 700;
-      padding: 3px 10px; border-radius: 5px; flex-shrink: 0;
-      background: var(--greenbg); color: var(--green); border: 1px solid var(--green);
-    }
-    .endpoint-path {
-      font-family: var(--mono); font-size: 13px; color: var(--text); font-weight: 500;
-    }
-    .endpoint-desc { color: var(--muted); font-size: 12px; margin-left: auto; }
-    .endpoint-chevron { color: var(--muted); font-size: 12px; margin-left: 8px; transition: transform 0.2s; }
-    .endpoint-card.open .endpoint-chevron { transform: rotate(180deg); }
+        /* TOPBAR MOBILE */
+        .topbar {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 52px;
+            background: #0e0e0e;
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 200;
+        }
+        .topbar-title {
+            font-family: var(--mono);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+        }
+        .menu-btn {
+            background: none;
+            border: none;
+            color: var(--text);
+            cursor: pointer;
+            padding: 6px;
+            display: flex;
+        }
 
-    .endpoint-body { display: none; border-top: 1px solid var(--border); }
-    .endpoint-card.open .endpoint-body { display: block; }
+        /* MAIN */
+        .main {
+            margin-left: 260px;
+            padding: 48px;
+            max-width: 900px;
+        }
 
-    .endpoint-inner { padding: 20px; }
-    .params-title { font-size: 11px; font-family: var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+        /* HERO */
+        .hero {
+            margin-bottom: 48px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid var(--border);
+            animation: fadeUp .7s cubic-bezier(.16, 1, .3, 1) both;
+        }
+        .hero-title {
+            font-family: var(--mono);
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #e5e5e5 60%, #888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero-title span {
+            background: linear-gradient(135deg, var(--red), #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero-desc {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.8;
+            max-width: 480px;
+        }
+        .hero-badges {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--muted);
+            letter-spacing: 0.05em;
+        }
+        .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 8px var(--green);
+            animation: pulse-dot 2s infinite;
+        }
+        @keyframes pulse-dot {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.4;
+            }
+        }
+        .badge-sep {
+            color: var(--border);
+        }
 
-    .param-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-start; }
-    .param-info { width: 180px; flex-shrink: 0; }
-    .param-name { font-family: var(--mono); font-size: 12px; color: var(--accent2); }
-    .param-type { font-size: 10px; color: var(--muted); }
-    .param-required { color: var(--red); font-size: 10px; }
-    .param-input {
-      flex: 1; background: var(--bg); border: 1px solid var(--border2);
-      color: var(--text); font-family: var(--mono); font-size: 12px;
-      padding: 7px 12px; border-radius: 6px; outline: none; transition: border-color 0.15s;
-    }
-    .param-input:focus { border-color: var(--accent); }
-    .param-input::placeholder { color: var(--muted); }
+        /* SECTION */
+        .section-title {
+            font-family: var(--mono);
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--muted);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+            margin-top: 40px;
+            animation: fadeUp .6s .1s cubic-bezier(.16, 1, .3, 1) both;
+        }
 
-    .param-select {
-      flex: 1; background: var(--bg); border: 1px solid var(--border2);
-      color: var(--text); font-family: var(--mono); font-size: 12px;
-      padding: 7px 12px; border-radius: 6px; outline: none; cursor: pointer;
-    }
-    .param-select:focus { border-color: var(--accent); }
+        /* ENDPOINT CARD */
+        .endpoint-card {
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 10px;
+            overflow: hidden;
+            transition: border-color .25s ease, box-shadow .25s ease, transform .25s cubic-bezier(.16, 1, .3, 1);
+            animation: fadeUp .5s cubic-bezier(.16, 1, .3, 1) both;
+        }
+        .endpoint-card:nth-child(1) {
+            animation-delay: .05s;
+        }
+        .endpoint-card:nth-child(2) {
+            animation-delay: .10s;
+        }
+        .endpoint-card:nth-child(3) {
+            animation-delay: .15s;
+        }
+        .endpoint-card:nth-child(4) {
+            animation-delay: .20s;
+        }
+        .endpoint-card:nth-child(5) {
+            animation-delay: .25s;
+        }
+        .endpoint-card:nth-child(6) {
+            animation-delay: .30s;
+        }
+        .endpoint-card:nth-child(7) {
+            animation-delay: .35s;
+        }
+        .endpoint-card:nth-child(8) {
+            animation-delay: .40s;
+        }
+        .endpoint-card:nth-child(9) {
+            animation-delay: .45s;
+        }
+        .endpoint-card:hover {
+            border-color: #444;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, .4);
+            transform: translateY(-1px);
+        }
+        .endpoint-card.open {
+            border-color: var(--red);
+            box-shadow: 0 0 0 1px var(--red), 0 8px 32px rgba(224, 51, 76, .08);
+            transform: none;
+        }
 
-    .btn-execute {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: var(--accent); color: #fff; font-family: var(--mono); font-size: 12px; font-weight: 600;
-      padding: 9px 20px; border-radius: 6px; border: none; cursor: pointer;
-      transition: all 0.15s; margin-top: 4px;
-    }
-    .btn-execute:hover { background: var(--accent2); transform: translateY(-1px); }
-    .btn-execute:active { transform: translateY(0); }
-    .btn-execute:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            cursor: pointer;
+            background: var(--bg2);
+            user-select: none;
+            transition: background .15s;
+        }
+        .endpoint-header:hover {
+            background: var(--bg3);
+        }
+        .endpoint-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .method-badge {
+            font-family: var(--mono);
+            font-size: 10px;
+            font-weight: 700;
+            background: var(--red);
+            color: #fff;
+            padding: 3px 8px;
+            border-radius: 2px;
+            letter-spacing: 0.05em;
+        }
+        .endpoint-path {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--text);
+        }
+        .chevron {
+            color: var(--muted);
+            transition: transform .2s;
+            font-size: 12px;
+        }
+        .endpoint-card.open .chevron {
+            transform: rotate(180deg);
+        }
 
-    .url-preview {
-      background: var(--bg); border: 1px solid var(--border);
-      border-radius: 6px; padding: 10px 14px; margin: 12px 0;
-      font-family: var(--mono); font-size: 11px; color: var(--muted);
-      word-break: break-all;
-    }
-    .url-preview span { color: var(--accent2); }
+        .endpoint-body {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            padding: 0 18px;
+            border-top: 0px solid var(--border);
+            background: var(--bg);
+            transition: max-height .45s cubic-bezier(.16, 1, .3, 1), opacity .3s ease, padding .3s ease, border-top-width .2s ease;
+        }
+        .endpoint-card.open .endpoint-body {
+            max-height: 2000px;
+            opacity: 1;
+            padding: 20px 18px;
+            border-top-width: 1px;
+        }
 
-    .response-box {
-      margin-top: 16px; background: var(--bg); border: 1px solid var(--border);
-      border-radius: 8px; overflow: hidden;
-    }
-    .response-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 8px 14px; border-bottom: 1px solid var(--border);
-      background: var(--bg3);
-    }
-    .response-status {
-      font-family: var(--mono); font-size: 11px; display: flex; align-items: center; gap: 8px;
-    }
-    .status-ok { color: var(--green); }
-    .status-err { color: var(--red); }
-    .status-loading { color: var(--yellow); }
-    .btn-copy {
-      background: var(--bg4); border: 1px solid var(--border2); color: var(--muted);
-      font-family: var(--mono); font-size: 10px; padding: 3px 10px; border-radius: 4px;
-      cursor: pointer; transition: all 0.15s;
-    }
-    .btn-copy:hover { color: var(--text); border-color: var(--border2); }
-    .response-pre {
-      padding: 16px; font-family: var(--mono); font-size: 11px; line-height: 1.7;
-      color: var(--text); overflow-x: auto; max-height: 400px; overflow-y: auto;
-      white-space: pre;
-    }
+        .endpoint-desc {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 20px;
+            font-family: var(--sans);
+        }
 
-    /* Section title */
-    .section-title {
-      font-size: 18px; font-weight: 600; margin-bottom: 6px;
-      display: flex; align-items: center; gap: 10px;
-    }
-    .section-title::before {
-      content: ''; display: block; width: 3px; height: 20px;
-      background: var(--accent); border-radius: 2px;
-    }
-    .section-desc { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+        /* PARAMS */
+        .params-label {
+            font-family: var(--mono);
+            font-size: 9px;
+            font-weight: 600;
+            color: var(--muted);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        .param-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .param-info {
+            flex: 1;
+        }
+        .param-name {
+            font-family: var(--mono);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text);
+        }
+        .param-optional {
+            font-family: var(--mono);
+            font-size: 9px;
+            color: var(--muted);
+            margin-left: 6px;
+            letter-spacing: 0.05em;
+        }
+        .param-desc {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+        .param-input,
+        .param-select {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-family: var(--mono);
+            font-size: 12px;
+            padding: 6px 10px;
+            width: 120px;
+            outline: none;
+            transition: border-color .15s;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .param-select {
+            background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            padding-right: 24px;
+            cursor: pointer;
+        }
+        .param-input:focus,
+        .param-select:focus {
+            border-color: var(--red);
+            box-shadow: 0 0 0 3px rgba(224, 51, 76, .12);
+            background: #1a1a1a;
+        }
 
-    .section-group { margin-bottom: 40px; }
+        /* URL BAR */
+        .url-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0 14px;
+        }
+        .url-display {
+            flex: 1;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 8px 12px;
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            overflow: hidden;
+        }
+        .url-method {
+            color: var(--red);
+            font-weight: 600;
+            font-size: 10px;
+        }
+        .url-text {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: var(--text);
+        }
 
-    /* Base URL box */
-    .base-url-box {
-      background: var(--bg2); border: 1px solid var(--border);
-      border-radius: 8px; padding: 14px 20px; margin-bottom: 28px;
-      display: flex; align-items: center; gap: 14px;
-    }
-    .base-url-label { font-size: 11px; color: var(--muted); font-family: var(--mono); white-space: nowrap; }
-    .base-url-val { font-family: var(--mono); font-size: 13px; color: var(--accent2); }
+        .btn-copy {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            border-radius: var(--radius);
+            padding: 7px 10px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: color .15s, border-color .15s;
+            display: flex;
+            align-items: center;
+        }
+        .btn-copy:hover {
+            color: var(--text);
+            border-color: #444;
+        }
 
-    /* Scrollbar */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: var(--bg2); }
-    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+        .btn-execute {
+            background: var(--red);
+            border: none;
+            color: #fff;
+            border-radius: var(--radius);
+            padding: 8px 16px;
+            cursor: pointer;
+            font-family: var(--mono);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: opacity .2s ease, transform .2s cubic-bezier(.16, 1, .3, 1), box-shadow .2s ease;
+        }
+        .btn-execute:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(224, 51, 76, .35);
+        }
+        .btn-execute:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+        .btn-execute:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
 
-    /* Responsive */
-    @media (max-width: 768px) {
-      .sidebar { width: 100%; min-height: auto; position: relative; }
-      .main { margin-left: 0; }
-      .hero { padding: 24px 20px; }
-      .content { padding: 20px; }
-      .stats-bar { flex-direction: column; }
-      .stat-item { border-right: none; border-bottom: 1px solid var(--border); }
-    }
+        /* RESPONSE */
+        .response-wrap {
+            margin-top: 16px;
+        }
+        .response-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .response-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .status-ok {
+            font-family: var(--mono);
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--green);
+            background: rgba(74, 222, 128, .1);
+            padding: 2px 8px;
+            border-radius: 2px;
+        }
+        .status-err {
+            font-family: var(--mono);
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--red);
+            background: var(--red-dim);
+            padding: 2px 8px;
+            border-radius: 2px;
+        }
+        .response-time {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--muted);
+        }
+        .response-type {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--muted);
+        }
+        .response-box {
+            background: #0a0a0a;
+            border: 1px solid var(--red);
+            border-left: 3px solid var(--red);
+            border-radius: var(--radius);
+            padding: 16px;
+            font-family: var(--mono);
+            font-size: 11px;
+            line-height: 1.7;
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+            animation: fadeUp .35s cubic-bezier(.16, 1, .3, 1) both;
+        }
+        .response-box .key {
+            color: var(--muted);
+        }
+        .response-box .str {
+            color: var(--red);
+        }
+        .response-box .num {
+            color: var(--text);
+        }
+        .response-box .bool {
+            color: #60a5fa;
+        }
 
-    /* JSON syntax highlight */
-    .json-key { color: #b09fff; }
-    .json-str { color: #3dffa0; }
-    .json-num { color: #ffd166; }
-    .json-bool { color: #ff9f7a; }
-    .json-null { color: #ff5f7a; }
+        .loading-bar {
+            height: 2px;
+            background: var(--red);
+            border-radius: 1px;
+            animation: loading 1.5s cubic-bezier(.16, 1, .3, 1) forwards;
+            margin-bottom: 8px;
+        }
+        @keyframes loading {
+            0% {
+                width: 0%;
+            }
+            50% {
+                width: 70%;
+            }
+            100% {
+                width: 100%;
+            }
+        }
 
-    .spinner {
-      display: inline-block; width: 12px; height: 12px;
-      border: 2px solid var(--muted); border-top-color: var(--accent);
-      border-radius: 50%; animation: spin 0.6s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-  </style>
+        /* EXAMPLE */
+        .example-label {
+            font-family: var(--mono);
+            font-size: 9px;
+            font-weight: 600;
+            color: var(--muted);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            margin-top: 16px;
+        }
+        .example-box {
+            background: #0a0a0a;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px 16px;
+            font-family: var(--mono);
+            font-size: 11px;
+            line-height: 1.7;
+            overflow-x: auto;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        /* FOOTER */
+        .footer {
+            margin-top: 64px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--muted);
+            text-align: center;
+            padding-bottom: 48px;
+        }
+        .footer a {
+            color: var(--red);
+            text-decoration: none;
+        }
+
+        /* OVERLAY */
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .6);
+            z-index: 99;
+        }
+
+        @media (max-width: 768px) {
+            .topbar {
+                display: flex;
+            }
+            .sidebar {
+                transform: translateX(-100%);
+                top: 52px;
+                height: calc(100vh - 52px);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .overlay.open {
+                display: block;
+            }
+            .main {
+                margin-left: 0;
+                padding: 24px 16px;
+                padding-top: 72px;
+            }
+            .hero-title {
+                font-size: 22px;
+            }
+            .param-row {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .param-input,
+            .param-select {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
 
-<!-- Sidebar -->
-<aside class="sidebar">
-  <div class="sidebar-header">
-    <div class="sidebar-logo">
-      <div class="logo-icon">🎬</div>
-      <div>
-        <div class="logo-text">DramaBox API</div>
-        <div class="logo-sub">by Gienetic</div>
-      </div>
+    <!-- TOPBAR MOBILE -->
+    <div class="topbar">
+        <span class="topbar-title">DRAMABOX API</span>
+        <button class="menu-btn" onclick="toggleSidebar()">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M3 12h18M3 6h18M3 18h18" />
+            </svg>
+        </button>
     </div>
-    <div class="badge-engine">
-      <span class="badge-dot"></span>
-      Exsala Engine · V5
-    </div>
-  </div>
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
-  <div class="sidebar-section">
-    <div class="sidebar-label">Navigation</div>
-    <a class="nav-item active" href="#search" onclick="setActive(this)">
-      <span class="nav-icon">🔍</span> Search Drama
-      <span class="nav-method">GET</span>
-    </a>
-    <a class="nav-item" href="#latest" onclick="setActive(this)">
-      <span class="nav-icon">🆕</span> Latest
-      <span class="nav-method">GET</span>
-    </a>
-    <a class="nav-item" href="#foryou" onclick="setActive(this)">
-      <span class="nav-icon">✨</span> For You
-      <span class="nav-method">GET</span>
-    </a>
-    <a class="nav-item" href="#comingsoon" onclick="setActive(this)">
-      <span class="nav-icon">📅</span> Coming Soon
-      <span class="nav-method">GET</span>
-    </a>
-    <a class="nav-item" href="#rank" onclick="setActive(this)">
-      <span class="nav-icon">🏆</span> Ranking
-      <span class="nav-method">GET</span>
-    </a>
-    <a class="nav-item" href="#vip" onclick="setActive(this)">
-      <span class="nav-icon">👑</span> VIP / Eksklusif
-      <span class="nav-method">GET</span>
-    </a>
-    <a class="nav-item" href="#classify" onclick="setActive(this)">
-      <span class="nav-icon">🗂️</span> Classify
-      <span class="nav-method">GET</span>
-    </a>
-    <a class="nav-item" href="#episodes" onclick="setActive(this)">
-      <span class="nav-icon">🎞️</span> Episodes
-      <span class="nav-method">GET</span>
-    </a>
-    <a class="nav-item" href="#decrypt" onclick="setActive(this)">
-      <span class="nav-icon">🔓</span> Decrypt URL
-      <span class="nav-method">GET</span>
-    </a>
-  </div>
-
-  <div class="sidebar-section" style="margin-top:auto; padding-bottom:20px;">
-    <div class="sidebar-label">Info</div>
-    <div style="padding:0 8px; font-size:11px; color:var(--muted); font-family:var(--mono); line-height:1.8;">
-      Powered by Exsala Proxy<br>
-      Akamai Bypass Engine<br>
-      Engine: Node.js · Vercel
-    </div>
-  </div>
-</aside>
-
-<!-- Main -->
-<main class="main">
-  <!-- Hero -->
-  <div class="hero">
-    <div class="hero-tag">⚡ Ultimate Scraper API</div>
-    <h1 class="hero-title">DramaBox Scraper <span>V5</span></h1>
-    <p class="hero-desc">Full REST API wrapper untuk DramaBox — powered by Exsala Proxy & Akamai Bypass Engine. Scrape search, ranking, episode list, decrypt video URL, dan lebih banyak lagi.</p>
-    <div class="hero-chips">
-      <span class="chip green">● Live</span>
-      <span class="chip purple">⚡ Exsala Engine</span>
-      <span class="chip">🛡️ Akamai Bypass</span>
-      <span class="chip">🇮🇩 in_ID Locale</span>
-    </div>
-  </div>
-
-  <!-- Stats -->
-  <div class="stats-bar">
-    <div class="stat-item">
-      <div class="stat-num">9</div>
-      <div class="stat-label">Endpoints</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num">REST</div>
-      <div class="stat-label">Protocol</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num">JSON</div>
-      <div class="stat-label">Response</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num">V5</div>
-      <div class="stat-label">Engine</div>
-    </div>
-  </div>
-
-  <!-- Content -->
-  <div class="content">
-
-    <div class="base-url-box">
-      <span class="base-url-label">BASE URL</span>
-      <span class="base-url-val" id="baseUrl">https://your-project.vercel.app</span>
-    </div>
-
-    <!-- SEARCH -->
-    <div class="section-group" id="search">
-      <div class="section-title">Search Drama</div>
-      <p class="section-desc">Cari drama berdasarkan keyword dengan filter sort dan pagination otomatis.</p>
-
-      <div class="endpoint-card open">
-        <div class="endpoint-header" onclick="toggleCard(this)">
-          <span class="method-badge">GET</span>
-          <span class="endpoint-path">/api/search</span>
-          <span class="endpoint-desc">Search by keyword</span>
-          <span class="endpoint-chevron">▼</span>
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-title">DRAMABOX API</div>
+            <div class="sidebar-sub">/ Exsala Engine V5</div>
         </div>
-        <div class="endpoint-body">
-          <div class="endpoint-inner">
-            <div class="params-title">Parameters</div>
-            <div class="param-row">
-              <div class="param-info">
-                <div class="param-name">q <span class="param-required">*</span></div>
-                <div class="param-type">string — keyword pencarian</div>
-              </div>
-              <input class="param-input" id="search-q" placeholder="cth: business proposal" oninput="updateUrl('search')">
+        <nav class="sidebar-nav" id="sidenav"></nav>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+        <div class="hero">
+            <div class="hero-title">DramaBox<span>Scraper</span></div>
+            <div class="hero-desc">Full REST API wrapper untuk DramaBox. Scrape search, ranking, episode list, decrypt video URL, dan lainnya.</div>
+            <div class="hero-badges">
+                <div class="badge"><span class="dot"></span> API Online</div>
+                <span class="badge-sep">|</span>
+                <div class="badge">Exsala Proxy · Akamai Bypass</div>
             </div>
-            <div class="param-row">
-              <div class="param-info">
-                <div class="param-name">sort</div>
-                <div class="param-type">1=Trending 2=Latest 3=Unwatched</div>
-              </div>
-              <select class="param-select" id="search-sort" onchange="updateUrl('search')">
-                <option value="1">1 — Trending</option>
-                <option value="2">2 — Latest</option>
-                <option value="3">3 — Unwatched</option>
-              </select>
-            </div>
-            <div class="url-preview" id="search-url-preview">
-              GET <span id="search-url-text">/api/search?q=&sort=1</span>
-            </div>
-            <button class="btn-execute" onclick="execute('search')">▶ Execute</button>
-            <div class="response-box" id="search-response" style="display:none">
-              <div class="response-header">
-                <span class="response-status" id="search-status"></span>
-                <button class="btn-copy" onclick="copyResponse('search')">Copy JSON</button>
-              </div>
-              <pre class="response-pre" id="search-pre"></pre>
-            </div>
-          </div>
         </div>
-      </div>
-    </div>
 
-    <!-- LATEST -->
-    <div class="section-group" id="latest">
-      <div class="section-title">Latest / Terbaru</div>
-      <p class="section-desc">Ambil daftar drama terbaru yang sudah tayang (full pagination).</p>
-      <div class="endpoint-card">
-        <div class="endpoint-header" onclick="toggleCard(this)">
-          <span class="method-badge">GET</span>
-          <span class="endpoint-path">/api/latest</span>
-          <span class="endpoint-desc">Daftar drama terbaru</span>
-          <span class="endpoint-chevron">▼</span>
+        <div id="endpoints-container"></div>
+
+        <div class="footer">
+            DramaBox Scraper API — by Gienetic &nbsp;·&nbsp; <a href="#" id="footer-link"></a>
         </div>
-        <div class="endpoint-body">
-          <div class="endpoint-inner">
-            <div class="params-title">No Parameters</div>
-            <div class="url-preview">GET <span>/api/latest</span></div>
-            <button class="btn-execute" onclick="execute('latest')">▶ Execute</button>
-            <div class="response-box" id="latest-response" style="display:none">
-              <div class="response-header">
-                <span class="response-status" id="latest-status"></span>
-                <button class="btn-copy" onclick="copyResponse('latest')">Copy JSON</button>
-              </div>
-              <pre class="response-pre" id="latest-pre"></pre>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    </main>
 
-    <!-- FOR YOU -->
-    <div class="section-group" id="foryou">
-      <div class="section-title">For You / Rekomendasi</div>
-      <p class="section-desc">Drama yang direkomendasikan oleh sistem DramaBox.</p>
-      <div class="endpoint-card">
-        <div class="endpoint-header" onclick="toggleCard(this)">
-          <span class="method-badge">GET</span>
-          <span class="endpoint-path">/api/foryou</span>
-          <span class="endpoint-desc">Rekomendasi drama</span>
-          <span class="endpoint-chevron">▼</span>
-        </div>
-        <div class="endpoint-body">
-          <div class="endpoint-inner">
-            <div class="params-title">No Parameters</div>
-            <div class="url-preview">GET <span>/api/foryou</span></div>
-            <button class="btn-execute" onclick="execute('foryou')">▶ Execute</button>
-            <div class="response-box" id="foryou-response" style="display:none">
-              <div class="response-header">
-                <span class="response-status" id="foryou-status"></span>
-                <button class="btn-copy" onclick="copyResponse('foryou')">Copy JSON</button>
-              </div>
-              <pre class="response-pre" id="foryou-pre"></pre>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <script>
+        const BASE_URL = window.location.origin;
 
-    <!-- COMING SOON -->
-    <div class="section-group" id="comingsoon">
-      <div class="section-title">Coming Soon / Akan Tayang</div>
-      <p class="section-desc">Daftar drama yang akan segera tayang beserta tanggal rilisnya.</p>
-      <div class="endpoint-card">
-        <div class="endpoint-header" onclick="toggleCard(this)">
-          <span class="method-badge">GET</span>
-          <span class="endpoint-path">/api/comingsoon</span>
-          <span class="endpoint-desc">Drama akan tayang</span>
-          <span class="endpoint-chevron">▼</span>
-        </div>
-        <div class="endpoint-body">
-          <div class="endpoint-inner">
-            <div class="params-title">No Parameters</div>
-            <div class="url-preview">GET <span>/api/comingsoon</span></div>
-            <button class="btn-execute" onclick="execute('comingsoon')">▶ Execute</button>
-            <div class="response-box" id="comingsoon-response" style="display:none">
-              <div class="response-header">
-                <span class="response-status" id="comingsoon-status"></span>
-                <button class="btn-copy" onclick="copyResponse('comingsoon')">Copy JSON</button>
-              </div>
-              <pre class="response-pre" id="comingsoon-pre"></pre>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+        // Data semua endpoint DramaBox
+        const ENDPOINTS = [{
+            id: 'search',
+            method: 'GET',
+            path: '/api/search',
+            desc: 'Cari drama berdasarkan keyword dengan filter sort dan pagination otomatis.',
+            params: [
+                { name: 'q', optional: false, desc: 'Kata kunci pencarian.', default: 'business proposal' },
+                { name: 'sort', optional: true, desc: '1=Trending, 2=Latest, 3=Unwatched.', default: '1', type: 'select',
+                    options: ['1', '2', '3'] }
+            ],
+            example: { status: "ok", data: [{ bookId: "1234", judul: "Business Proposal", score: "8.5" }],
+                pagination: { page: 1, total: 100 } }
+        }, {
+            id: 'latest',
+            method: 'GET',
+            path: '/api/latest',
+            desc: 'Ambil daftar drama terbaru yang sudah tayang (full pagination).',
+            params: [],
+            example: { status: "ok", data: [{ bookId: "5678", judul: "Drama Terbaru", lastEpisode: "Ep 12" }] }
+        }, {
+            id: 'foryou',
+            method: 'GET',
+            path: '/api/foryou',
+            desc: 'Drama yang direkomendasikan oleh sistem DramaBox.',
+            params: [],
+            example: { status: "ok", data: [{ bookId: "9012", judul: "Rekomendasi Untukmu", score: "9.1" }] }
+        }, {
+            id: 'comingsoon',
+            method: 'GET',
+            path: '/api/comingsoon',
+            desc: 'Daftar drama yang akan segera tayang beserta tanggal rilisnya.',
+            params: [],
+            example: { status: "ok", data: [{ bookId: "3456", judul: "Coming Soon Drama", rilis: "2026-06-01" }] }
+        }, {
+            id: 'rank',
+            method: 'GET',
+            path: '/api/rank',
+            desc: 'Top drama berdasarkan kategori ranking yang tersedia.',
+            params: [
+                { name: 'type', optional: true, desc: '1=Trending, 2=Popular Search, 3=Newest.', default: '1',
+                    type: 'select', options: ['1', '2', '3'] }
+            ],
+            example: { status: "ok", type: "trending", data: [{ bookId: "1111", judul: "Top Drama", rank: 1 }] }
+        }, {
+            id: 'vip',
+            method: 'GET',
+            path: '/api/vip',
+            desc: 'Koleksi drama eksklusif pilihan mingguan VIP.',
+            params: [],
+            example: { status: "ok", data: [{ bookId: "2222", judul: "VIP Drama", badge: "VIP" }] }
+        }, {
+            id: 'classify',
+            method: 'GET',
+            path: '/api/classify',
+            desc: 'Jelajah semua kategori genre (full pagination).',
+            params: [],
+            example: { status: "ok", data: [{ genre: "Romance", count: 45 }, { genre: "Action", count: 32 }] }
+        }, {
+            id: 'episodes',
+            method: 'GET',
+            path: '/api/episodes',
+            desc: 'Ambil semua episode dari sebuah drama berdasarkan Book ID.',
+            params: [
+                { name: 'id', optional: false, desc: 'Book ID drama.', default: '1234567' }
+            ],
+            example: { status: "ok", data: { bookId: "1234567", episodes: [{ ep: "1", title: "Episode 1" }] } }
+        }, {
+            id: 'decrypt',
+            method: 'GET',
+            path: '/api/decrypt',
+            desc: 'Decrypt URL video terenkripsi menjadi URL yang bisa langsung diputar via Exsala Proxy.',
+            params: [
+                { name: 'url', optional: false, desc: 'URL video terenkripsi.', default: 'https://cdn.dramaboxdb.com/...' }
+            ],
+            example: { status: "ok", decrypted_url: "https://proxy.exsala.id/..." }
+        }];
 
-    <!-- RANK -->
-    <div class="section-group" id="rank">
-      <div class="section-title">Ranking / Charts</div>
-      <p class="section-desc">Top drama berdasarkan kategori ranking yang tersedia.</p>
-      <div class="endpoint-card">
-        <div class="endpoint-header" onclick="toggleCard(this)">
-          <span class="method-badge">GET</span>
-          <span class="endpoint-path">/api/rank</span>
-          <span class="endpoint-desc">Top ranking drama</span>
-          <span class="endpoint-chevron">▼</span>
-        </div>
-        <div class="endpoint-body">
-          <div class="endpoint-inner">
-            <div class="params-title">Parameters</div>
-            <div class="param-row">
-              <div class="param-info">
-                <div class="param-name">type</div>
-                <div class="param-type">1=Trending 2=Popular Search 3=Newest</div>
-              </div>
-              <select class="param-select" id="rank-type" onchange="updateUrl('rank')">
-                <option value="1">1 — Trending</option>
-                <option value="2">2 — Popular Search</option>
-                <option value="3">3 — Newest</option>
-              </select>
-            </div>
-            <div class="url-preview">GET <span id="rank-url-text">/api/rank?type=1</span></div>
-            <button class="btn-execute" onclick="execute('rank')">▶ Execute</button>
-            <div class="response-box" id="rank-response" style="display:none">
-              <div class="response-header">
-                <span class="response-status" id="rank-status"></span>
-                <button class="btn-copy" onclick="copyResponse('rank')">Copy JSON</button>
-              </div>
-              <pre class="response-pre" id="rank-pre"></pre>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+        function syntaxHighlight(json) {
+            if (typeof json !== 'string') json = JSON.stringify(json, null, 2);
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const highlighted = json.replace(
+                /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(?:\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+                (match) => {
+                    let cls = 'num';
+                    if (/^"/.test(match)) cls = /:$/.test(match) ? 'key' : 'str';
+                    else if (/true|false/.test(match)) cls = 'bool';
+                    return `<span class="${cls}">${match}</span>`;
+                });
+            return `<pre style="white-space:pre-wrap;word-break:break-word;margin:0;">${highlighted}</pre>`;
+        }
 
-    <!-- VIP -->
-    <div class="section-group" id="vip">
-      <div class="section-title">VIP / Eksklusif</div>
-      <p class="section-desc">Koleksi drama eksklusif pilihan mingguan VIP.</p>
-      <div class="endpoint-card">
-        <div class="endpoint-header" onclick="toggleCard(this)">
-          <span class="method-badge">GET</span>
-          <span class="endpoint-path">/api/vip</span>
-          <span class="endpoint-desc">Drama eksklusif VIP</span>
-          <span class="endpoint-chevron">▼</span>
-        </div>
-        <div class="endpoint-body">
-          <div class="endpoint-inner">
-            <div class="params-title">No Parameters</div>
-            <div class="url-preview">GET <span>/api/vip</span></div>
-            <button class="btn-execute" onclick="execute('vip')">▶ Execute</button>
-            <div class="response-box" id="vip-response" style="display:none">
-              <div class="response-header">
-                <span class="response-status" id="vip-status"></span>
-                <button class="btn-copy" onclick="copyResponse('vip')">Copy JSON</button>
-              </div>
-              <pre class="response-pre" id="vip-pre"></pre>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+        function buildUrl(endpoint, inputs) {
+            let url = BASE_URL + endpoint.path;
+            const params = [];
+            endpoint.params.forEach(p => {
+                const val = inputs[p.name] || p.default;
+                if (val) params.push(`${p.name}=${encodeURIComponent(val)}`);
+            });
+            if (params.length) url += '?' + params.join('&');
+            return url;
+        }
 
-    <!-- CLASSIFY -->
-    <div class="section-group" id="classify">
-      <div class="section-title">Classify / Kategori</div>
-      <p class="section-desc">Browse drama berdasarkan kategori genre (full pagination).</p>
-      <div class="endpoint-card">
-        <div class="endpoint-header" onclick="toggleCard(this)">
-          <span class="method-badge">GET</span>
-          <span class="endpoint-path">/api/classify</span>
-          <span class="endpoint-desc">Jelajah semua kategori</span>
-          <span class="endpoint-chevron">▼</span>
-        </div>
-        <div class="endpoint-body">
-          <div class="endpoint-inner">
-            <div class="params-title">No Parameters</div>
-            <div class="url-preview">GET <span>/api/classify</span></div>
-            <button class="btn-execute" onclick="execute('classify')">▶ Execute</button>
-            <div class="response-box" id="classify-response" style="display:none">
-              <div class="response-header">
-                <span class="response-status" id="classify-status"></span>
-                <button class="btn-copy" onclick="copyResponse('classify')">Copy JSON</button>
-              </div>
-              <pre class="response-pre" id="classify-pre"></pre>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+        function renderEndpoints() {
+            const container = document.getElementById('endpoints-container');
+            const sidenav = document.getElementById('sidenav');
 
-    <!-- EPISODES -->
-    <div class="section-group" id="episodes">
-      <div class="section-title">Episodes / Raw Data</div>
-      <p class="section-desc">Ambil semua episode dari sebuah drama berdasarkan Book ID.</p>
-      <div class="endpoint-card">
-        <div class="endpoint-header" onclick="toggleCard(this)">
-          <span class="method-badge">GET</span>
-          <span class="endpoint-path">/api/episodes</span>
-          <span class="endpoint-desc">List episode per drama</span>
-          <span class="endpoint-chevron">▼</span>
-        </div>
-        <div class="endpoint-body">
-          <div class="endpoint-inner">
-            <div class="params-title">Parameters</div>
-            <div class="param-row">
-              <div class="param-info">
-                <div class="param-name">id <span class="param-required">*</span></div>
-                <div class="param-type">string — Book ID drama</div>
-              </div>
-              <input class="param-input" id="episodes-id" placeholder="cth: 1234567" oninput="updateUrl('episodes')">
-            </div>
-            <div class="url-preview">GET <span id="episodes-url-text">/api/episodes?id=</span></div>
-            <button class="btn-execute" onclick="execute('episodes')">▶ Execute</button>
-            <div class="response-box" id="episodes-response" style="display:none">
-              <div class="response-header">
-                <span class="response-status" id="episodes-status"></span>
-                <button class="btn-copy" onclick="copyResponse('episodes')">Copy JSON</button>
-              </div>
-              <pre class="response-pre" id="episodes-pre"></pre>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+            container.innerHTML = '<div class="section-title">Endpoints</div>';
 
-    <!-- DECRYPT -->
-    <div class="section-group" id="decrypt">
-      <div class="section-title">Decrypt Video URL</div>
-      <p class="section-desc">Decrypt URL video terenkripsi menjadi URL yang bisa langsung diputar via Exsala Proxy.</p>
-      <div class="endpoint-card">
-        <div class="endpoint-header" onclick="toggleCard(this)">
-          <span class="method-badge">GET</span>
-          <span class="endpoint-path">/api/decrypt</span>
-          <span class="endpoint-desc">Decrypt video URL</span>
-          <span class="endpoint-chevron">▼</span>
-        </div>
-        <div class="endpoint-body">
-          <div class="endpoint-inner">
-            <div class="params-title">Parameters</div>
-            <div class="param-row">
-              <div class="param-info">
-                <div class="param-name">url <span class="param-required">*</span></div>
-                <div class="param-type">string — URL video terenkripsi</div>
-              </div>
-              <input class="param-input" id="decrypt-url" placeholder="https://cdn.dramaboxdb.com/..." oninput="updateUrl('decrypt')">
-            </div>
-            <div class="url-preview">GET <span id="decrypt-url-text">/api/decrypt?url=</span></div>
-            <button class="btn-execute" onclick="execute('decrypt')">▶ Execute</button>
-            <div class="response-box" id="decrypt-response" style="display:none">
-              <div class="response-header">
-                <span class="response-status" id="decrypt-status"></span>
-                <button class="btn-copy" onclick="copyResponse('decrypt')">Copy JSON</button>
-              </div>
-              <pre class="response-pre" id="decrypt-pre"></pre>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+            ENDPOINTS.forEach(ep => {
+                // Sidebar nav
+                const navItem = document.createElement('a');
+                navItem.href = `#${ep.id}`;
+                navItem.className = 'nav-item';
+                navItem.innerHTML =
+                `<span>${ep.path}</span><span class="nav-method">${ep.method}</span>`;
+                navItem.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const target = document.getElementById(ep.id);
+                    if (target) {
+                        target.classList.add('open');
+                        setTimeout(() => {
+                            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 50);
+                        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove(
+                            'active'));
+                        navItem.classList.add('active');
+                        document.getElementById('sidebar').classList.remove('open');
+                        document.getElementById('overlay').classList.remove('open');
+                    }
+                });
+                sidenav.appendChild(navItem);
 
-  </div><!-- /content -->
-</main>
+                // Card
+                const card = document.createElement('div');
+                card.className = 'endpoint-card';
+                card.id = ep.id;
 
-<script>
-  // Set base URL from current location
-  const baseUrl = window.location.origin;
-  document.getElementById('baseUrl').textContent = baseUrl;
+                const paramsHtml = ep.params.length ? `
+                    <div class="params-label">Parameters</div>
+                    ${ep.params.map(p => {
+                        const inputField = p.type === 'select' ?
+                            `<select class="param-select" data-ep="${ep.id}" data-param="${p.name}">
+                                ${(p.options || []).map(opt => `<option value="${opt}" ${opt === p.default ? 'selected' : ''}>${opt}</option>`).join('')}
+                            </select>` :
+                            `<input class="param-input" data-ep="${ep.id}" data-param="${p.name}" value="${p.default}" placeholder="${p.name}">`;
+                        return `
+                            <div class="param-row">
+                                <div class="param-info">
+                                    <span class="param-name">${p.name}</span>
+                                    <span class="param-optional">${p.optional ? 'OPTIONAL' : 'REQUIRED'}</span>
+                                    <div class="param-desc">${p.desc}</div>
+                                </div>
+                                ${inputField}
+                            </div>
+                        `;
+                    }).join('')}
+                ` : '';
 
-  // Store responses
-  const responses = {};
+                card.innerHTML = `
+                    <div class="endpoint-header" onclick="toggleCard(this)">
+                        <div class="endpoint-left">
+                            <span class="method-badge">${ep.method}</span>
+                            <span class="endpoint-path">${ep.path}</span>
+                        </div>
+                        <span class="chevron">▼</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="endpoint-desc">${ep.desc}</div>
+                        ${paramsHtml}
+                        <div class="url-bar" id="urlbar-${ep.id}">
+                            <div class="url-display">
+                                <span class="url-method">${ep.method}</span>
+                                <span class="url-text" id="urltext-${ep.id}">${BASE_URL}${ep.path}${ep.params.length && ep.params[0].default ? '?' + ep.params[0].name + '=' + ep.params[0].default : ''}</span>
+                            </div>
+                            <button class="btn-copy" title="Copy URL" onclick="copyUrl('${ep.id}')">
+                                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                </svg>
+                            </button>
+                            <button class="btn-execute" id="btn-${ep.id}" onclick="execute('${ep.id}')">
+                                <svg width="11" height="11" fill="currentColor" viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></svg>
+                                EXECUTE
+                            </button>
+                        </div>
+                        <div id="response-${ep.id}"></div>
+                        <div class="example-label">Example Response</div>
+                        <div class="example-box">${syntaxHighlight(ep.example)}</div>
+                    </div>
+                `;
 
-  function setActive(el) {
-    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-    el.classList.add('active');
-  }
+                container.appendChild(card);
 
-  function toggleCard(header) {
-    const card = header.parentElement;
-    card.classList.toggle('open');
-  }
+                // Live update URL on input change
+                ep.params.forEach(p => {
+                    setTimeout(() => {
+                        const el = card.querySelector(`[data-param="${p.name}"]`);
+                        if (el) {
+                            el.addEventListener('input', () => updateUrl(ep));
+                            el.addEventListener('change', () => updateUrl(ep));
+                        }
+                    }, 0);
+                });
 
-  function updateUrl(endpoint) {
-    const el = document.getElementById(`${endpoint}-url-text`);
-    if (!el) return;
+                // Initial URL update
+                updateUrl(ep);
+            });
+        }
 
-    let url = `/api/${endpoint}`;
-    const params = new URLSearchParams();
+        function toggleCard(header) {
+            const card = header.parentElement;
+            card.classList.toggle('open');
+        }
 
-    if (endpoint === 'search') {
-      const q = document.getElementById('search-q').value;
-      const sort = document.getElementById('search-sort').value;
-      if (q) params.set('q', q);
-      params.set('sort', sort);
-    } else if (endpoint === 'rank') {
-      params.set('type', document.getElementById('rank-type').value);
-    } else if (endpoint === 'episodes') {
-      const id = document.getElementById('episodes-id').value;
-      if (id) params.set('id', id);
-    } else if (endpoint === 'decrypt') {
-      const u = document.getElementById('decrypt-url').value;
-      if (u) params.set('url', u);
-    }
+        function getInputs(epId) {
+            const inputs = {};
+            document.querySelectorAll(`[data-ep="${epId}"]`).forEach(el => {
+                inputs[el.dataset.param] = el.value;
+            });
+            return inputs;
+        }
 
-    if ([...params].length) url += '?' + params.toString();
-    el.textContent = url;
-  }
+        function updateUrl(ep) {
+            const inputs = getInputs(ep.id);
+            const url = buildUrl(ep, inputs);
+            const el = document.getElementById(`urltext-${ep.id}`);
+            if (el) el.textContent = url;
+        }
 
-  function syntaxHighlight(json) {
-    if (typeof json !== 'string') json = JSON.stringify(json, null, 2);
-    return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, match => {
-      let cls = 'json-num';
-      if (/^"/.test(match)) cls = /:$/.test(match) ? 'json-key' : 'json-str';
-      else if (/true|false/.test(match)) cls = 'json-bool';
-      else if (/null/.test(match)) cls = 'json-null';
-      return `<span class="${cls}">${match}</span>`;
-    });
-  }
+        function copyUrl(epId) {
+            const url = document.getElementById(`urltext-${epId}`)?.textContent;
+            if (url) navigator.clipboard.writeText(url);
+        }
 
-  async function execute(endpoint) {
-    const btn = event.target;
-    const resBox = document.getElementById(`${endpoint}-response`);
-    const statusEl = document.getElementById(`${endpoint}-status`);
-    const preEl = document.getElementById(`${endpoint}-pre`);
+        async function execute(epId) {
+            const ep = ENDPOINTS.find(e => e.id === epId);
+            const inputs = getInputs(epId);
+            const url = buildUrl(ep, inputs);
+            const btn = document.getElementById(`btn-${epId}`);
+            const respEl = document.getElementById(`response-${epId}`);
 
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> Loading...';
-    resBox.style.display = 'block';
-    statusEl.innerHTML = '<span class="status-loading">● Fetching...</span>';
-    preEl.innerHTML = '';
+            btn.disabled = true;
+            respEl.innerHTML = `<div class="loading-bar"></div>`;
 
-    let url = `${baseUrl}/api/${endpoint}`;
-    const params = new URLSearchParams();
+            const start = Date.now();
+            try {
+                const res = await fetch(url);
+                const elapsed = Date.now() - start;
+                const data = await res.json();
+                const isOk = res.ok;
 
-    try {
-      if (endpoint === 'search') {
-        const q = document.getElementById('search-q').value.trim();
-        if (!q) { throw new Error('Parameter q wajib diisi!'); }
-        params.set('q', q);
-        params.set('sort', document.getElementById('search-sort').value);
-      } else if (endpoint === 'rank') {
-        params.set('type', document.getElementById('rank-type').value);
-      } else if (endpoint === 'episodes') {
-        const id = document.getElementById('episodes-id').value.trim();
-        if (!id) { throw new Error('Parameter id wajib diisi!'); }
-        params.set('id', id);
-      } else if (endpoint === 'decrypt') {
-        const u = document.getElementById('decrypt-url').value.trim();
-        if (!u) { throw new Error('Parameter url wajib diisi!'); }
-        params.set('url', u);
-      }
+                respEl.innerHTML = `
+                    <div class="response-bar">
+                        <div class="response-meta">
+                            <span class="${isOk ? 'status-ok' : 'status-err'}">${res.status} ${isOk ? 'OK' : 'ERROR'}</span>
+                            <span class="response-time">${elapsed}ms</span>
+                        </div>
+                        <span class="response-type">application/json</span>
+                    </div>
+                    <div class="response-box">${syntaxHighlight(data)}</div>
+                `;
+            } catch (err) {
+                respEl.innerHTML = `
+                    <div class="response-bar">
+                        <span class="status-err">NETWORK ERROR</span>
+                    </div>
+                    <div class="response-box"><span class="str">"${err.message}"</span></div>
+                `;
+            }
+            btn.disabled = false;
+        }
 
-      if ([...params].length) url += '?' + params.toString();
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('open');
+        }
 
-      const start = Date.now();
-      const res = await fetch(url);
-      const elapsed = Date.now() - start;
-      const data = await res.json();
+        renderEndpoints();
 
-      responses[endpoint] = data;
+        // Footer link
+        const footerLink = document.getElementById('footer-link');
+        if (footerLink) {
+            footerLink.href = BASE_URL;
+            footerLink.textContent = window.location.host;
+        }
 
-      statusEl.innerHTML = `<span class="status-ok">● ${res.status} OK</span> <span style="color:var(--muted);font-size:10px;">${elapsed}ms · ${JSON.stringify(data).length} bytes</span>`;
-      preEl.innerHTML = syntaxHighlight(JSON.stringify(data, null, 2));
-    } catch (err) {
-      statusEl.innerHTML = `<span class="status-err">● Error</span>`;
-      preEl.innerHTML = `<span class="json-null">${err.message}</span>`;
-      responses[endpoint] = { error: err.message };
-    }
-
-    btn.disabled = false;
-    btn.innerHTML = '▶ Execute';
-  }
-
-  function copyResponse(endpoint) {
-    const data = responses[endpoint];
-    if (!data) return;
-    navigator.clipboard.writeText(JSON.stringify(data, null, 2)).then(() => {
-      const btn = event.target;
-      btn.textContent = 'Copied!';
-      setTimeout(() => btn.textContent = 'Copy JSON', 1500);
-    });
-  }
-</script>
+        // Active nav on scroll
+        window.addEventListener('scroll', () => {
+            ENDPOINTS.forEach(ep => {
+                const el = document.getElementById(ep.id);
+                if (!el) return;
+                const rect = el.getBoundingClientRect();
+                const navItem = document.querySelector(`.nav-item[href="#${ep.id}"]`);
+                if (navItem) {
+                    if (rect.top <= 120 && rect.bottom >= 0) {
+                        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove(
+                            'active'));
+                        navItem.classList.add('active');
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>
